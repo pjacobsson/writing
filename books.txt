@@ -1,0 +1,51 @@
+BOOKS YOU SHOULD READ
+
+An question I try now and then when I interview people for a programmer position and have some time to waste is "What's your favorite technical book?". It usually gets some interesting results. So far I've seen three or maybe four types of answers.
+
+First there's the "I don't read books anymore. I get all the information I need online". Great, because there's obviously no information recorded before 2005 that's worth knowing. You could at least mention "Design Patterns".
+
+Next: "Ehm? Book? Well... Spring In Action. Yes, I like Spring In Action". This tends to be guys that worked in a bank who don't actually know how to program.
+
+Third: "The Art of Computer Programming of course." Liar, but you still get some points. That exact thing only happened once actually. We hired the guy and he was great, so I'll take that one as a positive signal.
+
+I get pretty excited when someone shows some actual interest in what they're doing and talk about books like "The Little Schemer" or "Structure And Interpretation of Computer Programs". If you really want to get hired though, just say "Effective Java" (or anything else "Effective"). Then at least I know you've spent some time in the trenches.
+
+So in case you're ever interviewed by me I thought I'd write up some recommendation of books I like. I'll try to update this page when I think of some other good ones to mention.
+
+LEARN TO PROGRAM JAVA
+
+I've been writing Java code for some years by now (my first Java code used the newly released JDK 1.1, if I remember right). A few times otherwise experienced programmers have asked me what the best books are for getting up to speed on Java, and the three I list here are the ones I usually recommend. Two pretty obvious ones and one joker.
+
+Neither of these will be any good if you're looking for a pure beginner's tutorial. I have no idea where to turn for that, but once you know some stuff and want to get better you may want to look here. Don't wait too long. Also, I work with server-side software. If you need to make GUIs or do something with phones or whatever else you kids are up to nowadays these books probably won't do you that much good.
+
+Not suprisingly I think Josh Bloch's "Effective Java" is the most important book you can read. It's modelled after Scott Meyer's "Effective C++" series with fifty something short chapters all packed with advice about the subtle things and edge cases you really need to know when programming Java on a daily basis.
+
+Just like in the C++ books there's plenty of advice in the "Remember to point the gun AWAY from your face" vein, but Bloch's book also gets into fundamentally good design and patterns. His recommended style is not the the only way to program Java, but it probably should be. I've seen some really serious systems that were built on these fundamental ideas and they do seem to work. Check out the Google Collections library for a good showcase of Bloch-head style code.
+
+Important Java book number two is "Java Concurrency in Practice" by Brian Goetz. This one gets deep into the issues with multi-threaded code, something that Java is actually surprisingly good at.
+
+Goetz is taking the "scared straight" approach by first showing you terrifying examples of how unpredictable concurrent code gets. Oh, you thought modifying this variable in the constructor was safe? Nice try, but after a few iterations the JIT compiler finally decided that executing this instruction a bit later and inlining this other piece of code and running it earlier would be more performant. Now you have a data race on your hands that will lie dormant during testing but start triggering obscure errors in production on Christmas Eve next year.
+
+Luckily, the book also goes into how to use the java.util.concurrency package that was introduced in Java 1.5 to solve these problems. In case you didn't know: You don't need to work with raw threads and you don't need to use wait() and signal() anymore. There are better ways. No need to be that scared.
+
+Book number three is a bit of a secred weapon: "Server Based Java Programming" by Ted Neward. It's old -- written in 2000. And with that title it sounds like it would be another book that goes through servlets or EJB or some other crap for building Pet Stores that was popular back then, right? Not so much. This book talks about how to build application servers and why they work the way they do. Most importantly it goes into classloaders and what can be done with them. Classloaders are a critical piece of Java and I haven't found any other book that covers them this well. Added bonus: Since this book is so old you should be able to find it for like $8.
+
+And once you've gotten this far here's a bonus: Check out "Hardcore e Java" too, just for the chapter on weak references. It's another topic that hasn't been covered anywhere else, really. The book is about Java 1.4, so it's also old but there's some nice stuff in it though.
+
+SOFTWARE ENGINEERING
+
+It's been a few years since I last read Fowler's "Refactoring" but I remember it as very inspirational. It's the first book I read that really suggested programmers stop complaining and take some responsibility for their own work. If you hate working on crappy code, then you need to fix it. The actual quote that really got me is this one:
+
+"How to tell a manager [who is driven by schedule and not quality] about refactoring is one of the most common questions I've been asked. In these cases I give my more controversial advice: Don't tell! Subversive? I don't think so. Software developers are professionals."
+
+Perhaps the second half of the book with the catalogue of refactoring patterns is not that interesting at this point -- all that stuff has been built into the tools by now anyway, right? But the first half is still a necessary read.
+
+MIND-EXPANDING STUFF
+
+Lots have been written about "Structure and Interpretation of Computer Programs" by smarter people than myself. It's a well-deserved classic. The way they introduce programming with Scheme and work their way from simple functions to compilers and meta-circular evaluation is truly mind-boggling. But the thing that impresses me the most about it is that it's one of the few books that really tries to teach the art of building abstractions.
+
+I think understanding how to use abstractions is one of the key differences between good and bad programmers. Bad code tends to tell the computer what to do: "Ok, first store this value here. Then do this thing five times. No store the result over there and we're done. Thanks". Bad programmers produce piles and piles of that stuff. Like a collegue of mine always said: Some people can find ways to write Fortran code in any language.
+
+Good code on the other hand tends try to create and use some smart abstractions. It's the whole point of higher level programming languages. The right abstractions in turn leads to all the other good things we want in a system: separation of concerns, extensibility, maintainability.
+
+Maintaining mountains of code that's really just glamorized machine instructions is a serious problem and yet most books that teach people how to program are focused on that exact thing -- "Look, here's what you need to type to get the interpreter to move a value from one place to another". I understand why -- teaching abstractions is hard. I don't know how to do it. SICP is a really good try.

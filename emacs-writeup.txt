@@ -1,0 +1,156 @@
+
+<h1>Configuring Emacs</h1>
+
+<i>(last updated 2010-10-02)</i>
+
+<p>
+I just went through the exercise of configuring Emacs on my Mac laptop, and thought I'd try to document what I did. If nothing else, it will be useful to have when my hard drive dies and I have to go through it again, but maybe it could also be a good example for any newbies out there on how to get going with customizing their Emacs installs.
+</p>
+<p>
+Emacs is my main editor for code and text (Well, almost. For Java I find anything except Eclipse to be very masochistic, but Emacs works for all other languages). I'm not hardcore enough to use it for things like email, day planning or balancing my check book, so this write-up will just focus on getting a good, basic environment set up for writing code. Also I don't write tons of elisp myself, so this will mainly be getting built-in stuff working right.
+</p>
+<p>
+If you're not familiar at all with Emacs, you may want to start by getting it installed, taking a look at how the .emacs config file works and maybe getting into a tiny bit of elisp before reading too much further. I'm doing this with GNU Emacs 23.2.1. I didn't bother with compiling it myself, but got the binary from emacsformacosx.com. I'm not going to spend time arguing for why Emacs is a good thing, others have done a much better job than me on that front.
+</p>
+<p>
+Anyway, here's the complete .emacs file, and below the explanations for what's going on.
+</p>
+
+<h2>First, shut up</h2>
+<pre>
+(setq ring-bell-function 'ignore)
+</pre>
+<p>
+Not sure why the bell is turned on by default, but turning it off is generally the first step to keeping your sanity. You could change it to be a "visible bell" instead of having it actually beep, but that's just annoying in a different way. This command simply turns everything off.
+</p>
+
+<h2>Kill scrollbars</h2>
+
+<pre>
+(set-scroll-bar-mode nil)
+(size-indication-mode)
+(column-number-mode)
+(setq scroll-conservatively most-positive-fixnum)
+</pre>
+
+<p>
+The scroll bars that are turned on by default are pretty useless, since the line number and the little percentage display shows where you're at in the file anyway. Calling "set-scroll-bar-mode" with a nil parameter gets rid of them.
+</p>
+<p>
+You'll want to turn on "column-number-mode" and maybe even "size-indication-mode" instead, which shows which column you're in and the actual size of the file. Finally, the command that sets "scroll-conservatively" to the "most-positive-fixnum" switches the scrolling behavior to be the traditional one-line-at-the-time instead of Emacs more aggressive default.
+</p>
+
+<h2>Display and edit stuff</h2>
+
+<pre>
+(show-paren-mode t)
+(setq-default show-trailing-whitespace t)
+(setq-default indicate-empty-lines t)
+(setq-default require-final-newline t)
+(delete-selection-mode)
+</pre>
+
+<p>
+Now some commands to make the display and editing more pleasant. "show-paren-mode" gives you visual cues to which parenthesis matches the one your cursor is standing on. Critical for any Lisp programming obviously.
+</p>
+<p>
+Setting "show-trailing-whitespace" to true means that all trailing whitespace will be shown in angry red (and running "M-x delete-trailing-whitespace" is an efficient way to clean them up). "indicate-empty-lines" is the equivalent for trailing lines at the end of the file, and "require-final-newline" makes sure a newline is added whenever you save a file if there isn't one there already. Will save you some trouble editing crontabs, and other picky things. Finally, turning on "delete-selection-mode" means that when you mark a region and hit delete, the region will actually get deleted.
+</p>
+
+<h2>Kill the backup files</h2>
+<pre>
+(add-to-list 'backup-directory-alist '("." . "~/.emacs.d/backup"))
+</pre>
+<p>
+A vanilla Emacs setup will start polluting your file system with backup files. Whenever you edit a file, a backup of the previous version is kept around, with "~" appended to the name. It gets really annoying for anyone with at least a hint of OCD.
+</p>
+<p>
+Running this command changes that behavior and tells the system to instead store all the backup files in the folder ~/.emacs.d/backup. What's actually happening here, elisp-wise, is that we're pushing a pair onto the backup-directory-alist, where the first part, ".", is a regular expression that matches all possible files and the second the folder where the backups should be stored.
+</p>
+
+<h2>Buffer navigation</h2>
+
+<pre>
+(ido-mode)
+(setq ido-enable-flex-matching t)
+
+(require 'uniquify)
+(setq uniquify-buffer-name-style 'post-forward)
+</pre>
+
+<p>
+If you're going to pick just one thing from this list to start using, go with ido-mode. "ido" means "interactively do" and it adds some really nice file and buffer name completion mechanisms. ido-mode is built on top of another similar package called iSwitchB, and there's a competitor called Icicles that could be worth looking at too.
+</p>
+<p>
+Just turning on ido-mode gets you far, but I also switch on "ido-enable-flex-matching" which means that any characters in the right sequence will match when you're looking for a file or a buffer (so you can type "afi" to get to the file "AbstractFactoryImpl.java", for example).
+</p>
+<p>
+Also listed here is the command to start up "uniquify" which automatically will rename two buffers that share the same file name to something unique and understandable. The default Emacs behaviour is that the second buffer just gets "<2>" appended to the file name, but "uniquify" actually finds the piece of the path that differentiates the two files and shows that instead. I happen to prefer uniquify's "post-forward" style, but you can try the different possible ways to see which looks best to you.
+</p>
+
+<h2>Hippie Expand</h2>
+<pre>
+(global-set-key "\M- " 'hippie-expand)
+</pre>
+
+<p>
+Hippie Expand offers a crude form of text completion. When called, it will try to expand the current word by looking the contents of the open buffers and the kill-ring. Works surprisingly well even though it doesn't actually know anything about your code. I'm assigning it to M-space for quick access everywhere.
+</p>
+<p>
+Nobody knows why it's called hippie-expand, by the way. It's written by a Swede, maybe that explains it.
+</p>
+
+<h2>Highlight Symbol mode</h2>
+
+<pre>
+(add-to-list 'load-path "~/.emacs.d/site-lisp")
+(require 'highlight-symbol)
+(setq highlight-symbol-idle-delay 0.3)
+(add-hook 'python-mode-hook 'highlight-symbol-mode)
+</pre>
+
+<p>
+This is the only non-standard package I'll install for now. Highlight-symbol-mode looks at the symbol at point, and highlights all other occurrences of it in the buffer. Extremely useful for quick visual feedback on where this variable was first declared, for example.
+</p>
+<p>
+To get this to work you first need download the elisp code from http://nschum.de/src/Emacs/highlight-symbol. Put it in a folder called ~/.emacs.d/site-lisp. The listed commands simply sets up this folder as a place where elisp libraries are available, and then loads it up. Setting "highlight-symbol-idle-delay" to 0.3 means that it'll wait 0.3 seconds before starting to do any highlighting.
+</p>
+<p>
+Finally, and a bit annoying, is that highlight-symbol-mode is just a minor mode so you can't turn it on globally. You need to explicitly add it to the hooks for the major modes where we want it running. In this example I'm doing it for the Python mode, but you probably want to do this for most modes.
+</p>
+
+<h2>Other coding stuff</h2>
+<pre>
+(global-set-key "\C-c;" 'comment-or-uncomment-region)
+</pre>
+<p>
+This simply adds a keybinding that calls the comment-or-uncomment-region command when I press C-c ;. This comment does exactly what you'd expect: if the current region is not a comment it is commented out, and vice versa. It uses the comment style defined by the major mode you're currently using, so it works for all programming languages.
+</p>
+
+<h2>Text editing</h2>
+<pre>
+(setq-default ispell-program-name "/opt/local/bin/aspell")
+</pre>
+<p>
+Only one line of configuration here, but there's a few more tricks to make editing plain text better. First up: Get a spell checker installed. Emacs defers to ispell, aspell or whatever Unix program you prefer, so the first thing to do is to install one of those (probably easiest done using Macports). Once you've got that working, this line will tell Emacs which program to actually use, and you can then execute spell checking with M-$ or M-x ispell-buffer.
+</p>
+<p>
+Another thing worth knowing about is longlines-mode. I don't do anything special to start up this mode, since it's not appropriate for every file I simply turn it on when I need it with "M-x longlines-mode". Longlines-mode makes Emacs behave a bit more like a word processor. Lines are automatically wrapped, but no newline characters are ever inserted in the paragraphs. Not useful for coding, but very necessary when you're doing some writing.
+</p>
+
+<h2>Daemon / server mode</h2>
+
+<pre>
+(server-start)
+</pre>
+
+<p>
+Down the line you may actually end up loading so much elisp that starting up a new Emacs process starts taking a few seconds. That's a bit too much, and if you're like me you soon be thinking about picking some other editor just for all those fast one-off changes you need to make at the command line. No fear, server-mode to the rescue. This mode lets you keep one instance of Emacs running and have it act as a server, and whenever you need a new editor you start up lighter client versions that connect to the server to get their initial state. Startup is instant and you're able to share buffers between the server and clients.
+</p>
+<p>
+To take advantage of this, the trick is simply to call "(server-start)" from your main Emacs instance. Then run "emacsclient -c -nw" instead of "emacs" from the shell whenever you need a new editor (remember to change $EDITOR in your shell configuration).
+</p>
+<p>
+Even more advanced is "daemon-mode" in which the server is simply a daemon process with no actual GUI. This isn't very useful on a laptop, but can be a big win if you're using it on a desktop or server machine that you're logging into from multiple places.
+</p>
+<a href="http://www.pjacobsson.com">Per Jacobsson</a>, 2010
