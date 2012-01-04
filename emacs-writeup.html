@@ -1,13 +1,19 @@
 
 <h1>Configuring Emacs</h1>
 
-<i>(last updated 2010-10-02)</i>
+<i>(last updated 2012-01-03)</i>
 
 <p>
-I just went through the exercise of configuring Emacs on my Mac laptop, and thought I'd try to document what I did. If nothing else, it will be useful to have when my hard drive dies and I have to go through it again, but maybe it could also be a good example for any newbies out there on how to get going with customizing their Emacs installs.
+I just went through the exercise of configuring Emacs on my Mac laptop, and thought I'd try to document what I did. If nothing else, it will be useful to have when my hard drive dies and I have to go through it again, but it could also be a good example for any newbies out there on how to get going with customizing their Emacs installs.
 </p>
 <p>
-Emacs is my main editor for code and text (Well, almost. For Java I find anything except Eclipse to be very masochistic, but Emacs works for all other languages). I'm not hardcore enough to use it for things like email, day planning or balancing my check book, so this write-up will just focus on getting a good, basic environment set up for writing code. Also I don't write tons of elisp myself, so this will mainly be getting built-in stuff working right.
+Emacs is my main editor for code and text (Well, almost. For Java I find anything except Eclipse to be very masochistic, but Emacs works for all other programming languages). I'm not hardcore enough to use it for things like email, day planning or balancing my check book, so this write-up will just focus on getting a good, basic environment set up for writing code.
+</p>
+<p>
+A good way to think about Emacs is that it's designed be customized. As soon as there's something you don't like, chances are high that you can change it to behave the way you want instead. And you should! With Emacs, ruthless customization is what gets you the real productivity boosts.
+</p>
+<p>
+I also try to make sure I understand what all my customizations actually do. It's very easy to just copy some big blob from someone else's .emacs file for example. But when I do that I always just forget about the fancy new functionality and don't actually use it.
 </p>
 <p>
 If you're not familiar at all with Emacs, you may want to start by getting it installed, taking a look at how the .emacs config file works and maybe getting into a tiny bit of elisp before reading too much further. I'm doing this with GNU Emacs 23.2.1. I didn't bother with compiling it myself, but got the binary from emacsformacosx.com. I'm not going to spend time arguing for why Emacs is a good thing, others have done a much better job than me on that front.
@@ -16,12 +22,84 @@ If you're not familiar at all with Emacs, you may want to start by getting it in
 Anyway, here's the complete .emacs file, and below the explanations for what's going on.
 </p>
 
+<pre>
+;; Shut up
+(setq ring-bell-function 'ignore)
+
+;; Kill scrollbars
+(set-scroll-bar-mode nil)
+(size-indication-mode)
+(column-number-mode)
+
+;; Scroll one line at the time
+(setq scroll-conservatively most-positive-fixnum)
+
+;; Improved end-of-buffer scrolling
+(global-set-key "\C-v"
+  (lambda () (interactive)
+    (condition-case nil (scroll-up)
+      (end-of-buffer (goto-char (point-max))))))
+
+(global-set-key "\M-v"
+  (lambda () (interactive)
+    (condition-case nil (scroll-down)
+      (beginning-of-buffer (goto-char (point-min))))))
+
+;; Kill backup files
+(add-to-list 'backup-directory-alist '("." . "~/.emacs.d/backup"))
+
+;; Display and edit stuff
+(show-paren-mode t)
+(setq-default show-trailing-whitespace t)
+(setq-default indicate-empty-lines t)
+(setq-default require-final-newline t)
+(delete-selection-mode)
+
+;; Buffer navigation
+(ido-mode)
+(setq ido-enable-flex-matching t)
+
+(require 'uniquify)
+(setq uniquify-buffer-name-style 'post-forward)
+
+;; Window navigation
+(winner-mode t)
+
+;; Hippie Expand
+(global-set-key "\M- " 'hippie-expand)
+
+;; Highlight symbol mode
+;; http://nschum.de/src/emacs/highlight-symbol
+(add-to-list 'load-path "~/.emacs.d/site-lisp")
+(require 'highlight-symbol)
+(setq highlight-symbol-idle-delay 0.3)
+(add-hook 'python-mode-hook 'highlight-symbol-mode)
+(add-hook 'c-mode-hook 'highlight-symbol-mode)
+(add-hook 'c++-mode-hook 'highlight-symbol-mode)
+
+;; Other coding stuff
+(global-set-key "\C-c;" 'comment-or-uncomment-region)
+(global-set-key "\C-cc" 'compile)
+
+;; Text edit stuff
+(setq-default ispell-program-name "/opt/local/bin/aspell")
+
+;; Force yourself to use the arrow keys
+(global-set-key (kbd "<up>") nil)
+(global-set-key (kbd "<down>") nil)
+(global-set-key (kbd "<left>") nil)
+(global-set-key (kbd "<right>") nil)
+
+;; Server mode
+(server-start)
+</pre>
+
 <h2>First, shut up</h2>
 <pre>
 (setq ring-bell-function 'ignore)
 </pre>
 <p>
-Not sure why the bell is turned on by default, but turning it off is generally the first step to keeping your sanity. You could change it to be a "visible bell" instead of having it actually beep, but that's just annoying in a different way. This command simply turns everything off.
+Not sure why the bell is still turned on by default, but turning it off is generally the first step to keeping your sanity. You could change it to be a "visible bell" instead of having it actually beep, but that's just annoying in a different way. This command simply turns everything off.
 </p>
 
 <h2>Kill scrollbars</h2>
@@ -30,14 +108,36 @@ Not sure why the bell is turned on by default, but turning it off is generally t
 (set-scroll-bar-mode nil)
 (size-indication-mode)
 (column-number-mode)
-(setq scroll-conservatively most-positive-fixnum)
 </pre>
 
 <p>
 The scroll bars that are turned on by default are pretty useless, since the line number and the little percentage display shows where you're at in the file anyway. Calling "set-scroll-bar-mode" with a nil parameter gets rid of them.
 </p>
 <p>
-You'll want to turn on "column-number-mode" and maybe even "size-indication-mode" instead, which shows which column you're in and the actual size of the file. Finally, the command that sets "scroll-conservatively" to the "most-positive-fixnum" switches the scrolling behavior to be the traditional one-line-at-the-time instead of Emacs more aggressive default.
+You'll want to turn on "column-number-mode" and maybe even "size-indication-mode" instead, which shows which column you're in and the actual size of the file.
+</p>
+
+<h2>Scrolling</h2>
+
+<pre>
+;; Scroll one line at the time
+(setq scroll-conservatively most-positive-fixnum)
+
+;; Improved end-of-buffer scrolling
+(global-set-key "\C-v"
+  (lambda () (interactive)
+    (condition-case nil (scroll-up)
+      (end-of-buffer (goto-char (point-max))))))
+
+(global-set-key "\M-v"
+  (lambda () (interactive)
+    (condition-case nil (scroll-down)
+      (beginning-of-buffer (goto-char (point-min))))))
+</pre>
+
+Emacs default scrolling behavior is a bit, well, unorthodox. To fix this I first set "scroll-conservatively" to the "most-positive-fixnum" which switches the scrolling to the traditional one-line-at-the-time instead of Emacs more aggressive default.
+
+The second part of this snippet is a hack to make scrolling to the beginning and end of the buffer work like you expect it. The idiotic default will apparently be fixed in Emacs 24, but until that's released this will do the trick.
 </p>
 
 <h2>Display and edit stuff</h2>
@@ -79,13 +179,28 @@ Running this command changes that behavior and tells the system to instead store
 </pre>
 
 <p>
-If you're going to pick just one thing from this list to start using, go with ido-mode. "ido" means "interactively do" and it adds some really nice file and buffer name completion mechanisms. ido-mode is built on top of another similar package called iSwitchB, and there's a competitor called Icicles that could be worth looking at too.
+If you're going to pick just one thing from this list to start using, go with ido-mode. "ido" means "interactively do" and it adds some really nice name completion mechanisms when opening files and switching between buffers. ido-mode is built on top of another similar package called iSwitchB, and there's a competitor called Icicles that could be worth looking at too.
 </p>
 <p>
 Just turning on ido-mode gets you far, but I also switch on "ido-enable-flex-matching" which means that any characters in the right sequence will match when you're looking for a file or a buffer (so you can type "afi" to get to the file "AbstractFactoryImpl.java", for example).
 </p>
 <p>
-Also listed here is the command to start up "uniquify" which automatically will rename two buffers that share the same file name to something unique and understandable. The default Emacs behaviour is that the second buffer just gets "<2>" appended to the file name, but "uniquify" actually finds the piece of the path that differentiates the two files and shows that instead. I happen to prefer uniquify's "post-forward" style, but you can try the different possible ways to see which looks best to you.
+Also listed here is the command to start up "uniquify" which automatically will rename two buffers that share the same file name to something unique and understandable. The default Emacs behaviour is that the second buffer just gets "<2>" appended to the file name, but that gets confusing quickly. Uniquify actually finds the piece of the path that differentiates the two files and shows that instead. I happen to prefer uniquify's "post-forward" style, but you can try the different possible ways to see which looks best to you.
+</p>
+
+<h2>Window navigation</h2>
+
+<pre>
+(winner-mode t)
+</pre>
+
+<p>
+More often than not you'll find your carefully crafted window layout suddenly destroyed by some random command you just executed (ediff is the typical culprit for me). Turning on winner-mode makes that a bit less annoying.
+</p>
+<p>This minor mode keeps track of your last N window layouts and lets you switch between them quickly. So as soon as you're done with the ediff session that screwed everything up you can simply hit C-left arrow and the previous setup is magically recovered.
+</p>
+<p>
+ediff is very nice, by the way. Make sure you take a look at it.
 </p>
 
 <h2>Hippie Expand</h2>
@@ -94,7 +209,7 @@ Also listed here is the command to start up "uniquify" which automatically will 
 </pre>
 
 <p>
-Hippie Expand offers a crude form of text completion. When called, it will try to expand the current word by looking the contents of the open buffers and the kill-ring. Works surprisingly well even though it doesn't actually know anything about your code. I'm assigning it to M-space for quick access everywhere.
+Hippie Expand offers a crude form of text completion (like a poor man's Intellisense). When called, it will try to expand the current word at point by looking the contents of the open buffers and the kill-ring. Works surprisingly well even though it doesn't actually know anything about your code. I'm assigning it to M-space for quick access everywhere.
 </p>
 <p>
 Nobody knows why it's called hippie-expand, by the way. It's written by a Swede, maybe that explains it.
@@ -116,15 +231,19 @@ This is the only non-standard package I'll install for now. Highlight-symbol-mod
 To get this to work you first need download the elisp code from http://nschum.de/src/Emacs/highlight-symbol. Put it in a folder called ~/.emacs.d/site-lisp. The listed commands simply sets up this folder as a place where elisp libraries are available, and then loads it up. Setting "highlight-symbol-idle-delay" to 0.3 means that it'll wait 0.3 seconds before starting to do any highlighting.
 </p>
 <p>
-Finally, and a bit annoying, is that highlight-symbol-mode is just a minor mode so you can't turn it on globally. You need to explicitly add it to the hooks for the major modes where we want it running. In this example I'm doing it for the Python mode, but you probably want to do this for most modes.
+Finally, and a bit annoying, is that this is just a minor mode so you can't turn it on globally. You need to explicitly add it to the hooks for the major modes where we want it running. In this example I'm doing it for Python, but you probably want to do this for most modes.
 </p>
 
 <h2>Other coding stuff</h2>
 <pre>
 (global-set-key "\C-c;" 'comment-or-uncomment-region)
+(global-set-key "\C-cc" 'compile)
 </pre>
 <p>
-This simply adds a keybinding that calls the comment-or-uncomment-region command when I press C-c ;. This comment does exactly what you'd expect: if the current region is not a comment it is commented out, and vice versa. It uses the comment style defined by the major mode you're currently using, so it works for all programming languages.
+This first line here simply adds a keybinding that calls the comment-or-uncomment-region command when I press C-c ;. The command does exactly what you'd expect: if the current region is not a comment it is commented out, and vice versa. It uses the comment style defined by the major mode you're currently using, so it works for all programming languages.
+</p>
+<p>
+The second command is to bind C-cc to the compile command. This will let you specify a command to compile the current buffer, and sends the output to a special buffer called *compilation*, where you can step through error messages and so on.
 </p>
 
 <h2>Text editing</h2>
@@ -135,8 +254,22 @@ This simply adds a keybinding that calls the comment-or-uncomment-region command
 Only one line of configuration here, but there's a few more tricks to make editing plain text better. First up: Get a spell checker installed. Emacs defers to ispell, aspell or whatever Unix program you prefer, so the first thing to do is to install one of those (probably easiest done using Macports). Once you've got that working, this line will tell Emacs which program to actually use, and you can then execute spell checking with M-$ or M-x ispell-buffer.
 </p>
 <p>
-Another thing worth knowing about is longlines-mode. I don't do anything special to start up this mode, since it's not appropriate for every file I simply turn it on when I need it with "M-x longlines-mode". Longlines-mode makes Emacs behave a bit more like a word processor. Lines are automatically wrapped, but no newline characters are ever inserted in the paragraphs. Not useful for coding, but very necessary when you're doing some writing.
+Another thing worth knowing about is longlines-mode. I don't do anything special to start up this mode, since it's not appropriate for every file. I simply turn it on when I need it with "M-x longlines-mode". This mode makes Emacs behave a bit more like a word processor. Lines are automatically wrapped, but no newline characters are ever inserted in the paragraphs. Not useful for coding, but very necessary when you're doing some writing.
 </p>
+
+<h2>Punish yourself</h2>
+
+<pre>
+;; Force yourself to avoid the arrow keys
+(global-set-key (kbd "<up>") nil)
+(global-set-key (kbd "<down>") nil)
+(global-set-key (kbd "<left>") nil)
+(global-set-key (kbd "<right>") nil)
+</pre>
+
+One thing that comes up a lot is Emacs' steep learning curve, and how you need to invest in getting comfortable with it. Here's a good way to get into that mindset: Turn off the arrow keys and force yourself to use C-f, C-b, C-n and C-p to navigate around the buffers instead. It took me a week or two to recover after I did this, but it seems like editing goes faster now since I don't leave home row that often anymore.
+
+Arguably, this is a bit crazy, so you may not want to do this your first week with Emacs. Or try it right before a critical deadline. Another downside is that once you get used to these keybindings you will constantly have other programs open new windows and print dialog boxes when you try to navigate their text fields. But that's the life we chose.
 
 <h2>Daemon / server mode</h2>
 
@@ -145,7 +278,7 @@ Another thing worth knowing about is longlines-mode. I don't do anything special
 </pre>
 
 <p>
-Down the line you may actually end up loading so much elisp that starting up a new Emacs process starts taking a few seconds. That's a bit too much, and if you're like me you soon be thinking about picking some other editor just for all those fast one-off changes you need to make at the command line. No fear, server-mode to the rescue. This mode lets you keep one instance of Emacs running and have it act as a server, and whenever you need a new editor you start up lighter client versions that connect to the server to get their initial state. Startup is instant and you're able to share buffers between the server and clients.
+Down the line you'll actually end up loading so much elisp that starting up a new Emacs process will take a few seconds. That's a bit too much, and if you're like me you soon be thinking about picking some other editor just for all those fast one-off changes you need to make at the command line. No fear, server-mode to the rescue. This mode lets you keep one instance of Emacs running and have it act as a server, and whenever you need a new editor you start up lighter client versions that connect to the server to get their initial state. Startup is instant and you're able to share buffers between the server and clients.
 </p>
 <p>
 To take advantage of this, the trick is simply to call "(server-start)" from your main Emacs instance. Then run "emacsclient -c -nw" instead of "emacs" from the shell whenever you need a new editor (remember to change $EDITOR in your shell configuration).
@@ -153,4 +286,4 @@ To take advantage of this, the trick is simply to call "(server-start)" from you
 <p>
 Even more advanced is "daemon-mode" in which the server is simply a daemon process with no actual GUI. This isn't very useful on a laptop, but can be a big win if you're using it on a desktop or server machine that you're logging into from multiple places.
 </p>
-<a href="http://www.pjacobsson.com">Per Jacobsson</a>, 2010
+<a href="http://www.pjacobsson.com">Per Jacobsson</a>, 2012
