@@ -1,10 +1,10 @@
 
 <h1>Configuring Emacs</h1>
 
-<i>(last updated 2012-01-08)</i>
+<i>(Last updated 2012-01-08)</i>
 
 <p>
-I just went through the exercise of configuring Emacs on my Mac laptop, and thought I'd try to document what I did. If nothing else, it will be useful to have when my hard drive dies and I have to go through it again, but it could also be a good example for any newbies out there on how to get going customizing their Emacs installs.
+I just went through the exercise of configuring Emacs on my Mac laptop, and thought I'd try to document what I did. If nothing else, it will be useful to have whenever I need to go through it again, but it could also be a good example for any newbies out there on how to get going customizing their Emacs installs.
 </p>
 <p>
 Emacs is my main editor for code and text (Well, almost. For Java I find anything except Eclipse to be very masochistic, but Emacs works for all other programming languages). I'm not hardcore enough to use it for things like email, day planning or balancing my check book, so this write-up will just focus on getting a good, basic environment set up for writing code.
@@ -19,7 +19,7 @@ I try to make sure I understand what all my customizations actually do. It's ver
 If you're not familiar at all with Emacs, you may want to start by getting it installed, taking a look at how the .emacs config file works and maybe getting into a tiny bit of elisp before reading too much further. I'm doing this with GNU Emacs 23.2.1. I didn't bother with compiling it myself, but got the binary from <a href="http://www.emacsformacosx.com">emacsformacosx.com</a>. I'm not going to spend time arguing for why Emacs is a good thing, others have done a much better job than me on that front.
 </p>
 <p>
-Anyway, here's the complete .emacs file, and below the explanations for what's going on.
+Anyway, here's the current state of the complete .emacs file, and below the explanations for what's going on.
 </p>
 
 <pre>
@@ -276,10 +276,12 @@ Another thing worth knowing about is longlines-mode. I don't do anything special
 (global-set-key (kbd "<left>") nil)
 (global-set-key (kbd "<right>") nil)
 </pre>
-
+<p>
 One thing that comes up a lot is Emacs's steep learning curve, and how you need to invest in getting comfortable with it. Here's a good way to get into that mindset: Turn off the arrow keys and force yourself to use C-f, C-b, C-n and C-p to navigate around the buffers instead. It took me a week or two to recover after I did this, but it seems like editing goes faster now since I don't leave home row that often anymore.
-
-Arguably this is a bit extreme, so you may not want to do this your first week with Emacs. Or try it right before a critical deadline. Another downside is that once you get used to these keybindings you will constantly have other programs open new windows and print dialog boxes when you try to navigate their text fields. But that's the life we chose.
+</p>
+<p>
+Arguably this is a bit extreme, so you may not want to do it your first week with Emacs. Or try it right before a critical deadline. Another downside is that once you get used to these keybindings you will constantly have other programs open new windows and print dialog boxes when you try to navigate their text fields. But that's the life we chose.
+</p>
 
 <h2>Daemon / server mode</h2>
 
@@ -288,7 +290,7 @@ Arguably this is a bit extreme, so you may not want to do this your first week w
 </pre>
 
 <p>
-Down the line you'll actually end up loading so much elisp that starting up a new Emacs process will take a few seconds. That's a bit too much, and if you're like me you soon be thinking about picking some OTHER editor just for all those fast one-off changes you need to make at the command line. That's not good.
+Down the line you'll actually end up loading so much elisp that starting up a new Emacs process will take a few seconds. That's a bit too much, and if you're like me you soon be thinking about picking some other(!) editor just for all those fast one-off changes you need to make at the command line. That's not good.
 </p>
 <p>No fear, server-mode to the rescue. This mode lets you keep one instance of Emacs running and have it act as a server, and whenever you need a new editor you start up lighter client versions that connect to the server to get their initial state. Startup is instant and you're able to share buffers between the server and clients.
 </p>
@@ -298,4 +300,10 @@ To take advantage of this, the trick is simply to call "(server-start)" from you
 <p>
 Even more advanced is "daemon-mode" in which the server is simply a daemon process with no actual GUI. This isn't very useful on a laptop, but can be a big win if you're using it on a desktop or server machine that you're logging into from multiple places.
 </p>
-<a href="http://www.pjacobsson.com">Per Jacobsson</a>, 2012
+<a href="http://www.pjacobsson.com">Per Jacobsson</a>
+<p>
+<ul>
+<li>First version 2010-10-07</li>
+<li>Updated 2012-01-08</li>
+<ul>
+</p>
