@@ -1,19 +1,19 @@
 
 <h1>Configuring Emacs</h1>
 
-<i>(last updated 2012-01-03)</i>
+<i>(last updated 2012-01-08)</i>
 
 <p>
-I just went through the exercise of configuring Emacs on my Mac laptop, and thought I'd try to document what I did. If nothing else, it will be useful to have when my hard drive dies and I have to go through it again, but it could also be a good example for any newbies out there on how to get going with customizing their Emacs installs.
+I just went through the exercise of configuring Emacs on my Mac laptop, and thought I'd try to document what I did. If nothing else, it will be useful to have when my hard drive dies and I have to go through it again, but it could also be a good example for any newbies out there on how to get going customizing their Emacs installs.
 </p>
 <p>
 Emacs is my main editor for code and text (Well, almost. For Java I find anything except Eclipse to be very masochistic, but Emacs works for all other programming languages). I'm not hardcore enough to use it for things like email, day planning or balancing my check book, so this write-up will just focus on getting a good, basic environment set up for writing code.
 </p>
 <p>
-A good way to think about Emacs is that it's designed be customized. As soon as there's something you don't like, the odds are high that you can change it to behave the way you want instead. And you should! With Emacs, ruthless and constant customization is what gets you the real productivity gains.
+A good way to think about Emacs is that it's designed be customized. As soon as there's something you don't like (and there will be), the odds are high that you can change it to behave the way you want instead. And you should! With Emacs, ruthless and constant customization is what gets you the real productivity gains.
 </p>
 <p>
-I also try to make sure I understand what all my customizations actually do. It's very easy to just copy some big blob of code from someone else's .emacs file, but when I do that I always just forget about the fancy new functionality and end up not actually using it. Doing the homework seems to pay off.
+I try to make sure I understand what all my customizations actually do. It's very easy to just copy a big blob of code from someone else's .emacs file, but when I do that I always immediately forget about the fancy new functionality and end up not actually using it. Doing the homework seems to pay off.
 </p>
 <p>
 If you're not familiar at all with Emacs, you may want to start by getting it installed, taking a look at how the .emacs config file works and maybe getting into a tiny bit of elisp before reading too much further. I'm doing this with GNU Emacs 23.2.1. I didn't bother with compiling it myself, but got the binary from <a href="http://www.emacsformacosx.com">emacsformacosx.com</a>. I'm not going to spend time arguing for why Emacs is a good thing, others have done a much better job than me on that front.
@@ -80,6 +80,10 @@ Anyway, here's the complete .emacs file, and below the explanations for what's g
 ;; Other coding stuff
 (global-set-key "\C-c;" 'comment-or-uncomment-region)
 (global-set-key "\C-cc" 'compile)
+
+(add-hook 'python-mode-hook 'subword-mode)
+(add-hook 'c-mode-hook 'subword-mode)
+(add-hook 'c++-mode-hook 'subword-mode)
 
 ;; Text edit stuff
 (setq-default ispell-program-name "/opt/local/bin/aspell")
@@ -154,7 +158,7 @@ The second part of this snippet is a hack to make scrolling to the beginning and
 Now some commands to make the display and editing more pleasant. "show-paren-mode" gives you visual cues to which parenthesis matches the one your cursor is standing on. Critical for any Lisp programming obviously.
 </p>
 <p>
-Setting "show-trailing-whitespace" to true means that all trailing whitespace will be shown in angry red (and running "M-x delete-trailing-whitespace" is an efficient way to clean them up). "indicate-empty-lines" is the equivalent for trailing lines at the end of the file, and "require-final-newline" makes sure a newline is added whenever you save a file if there isn't one there already. Will save you some trouble editing crontabs, and other picky things. Finally, turning on "delete-selection-mode" means that when you mark a region and hit delete, the region will actually get deleted.
+Setting "show-trailing-whitespace" to true means that all trailing whitespace will be shown in angry red (and running "M-x delete-trailing-whitespace" is an efficient way to clean them up). "indicate-empty-lines" is the equivalent for trailing lines at the end of the file, and "require-final-newline" makes sure a newline is added whenever you save a file if there isn't one there already. This will save you some trouble editing crontabs, and other picky things. Finally, turning on "delete-selection-mode" means that when you mark a region and hit delete, the region will actually get deleted.
 </p>
 
 <h2>Kill the backup files</h2>
@@ -197,7 +201,7 @@ Also listed here is the command to start up "uniquify" which automatically will 
 <p>
 More often than not you'll find your carefully crafted window layout suddenly destroyed by some random command you just executed (ediff is the typical culprit for me). Turning on winner-mode makes that a bit less annoying.
 </p>
-<p>This minor mode keeps track of your last N window layouts and lets you switch between them quickly. So as soon as you're done with the ediff session that screwed everything up you can simply hit C-left arrow and the previous setup is magically recovered.
+<p>This minor mode keeps track of your last window layouts and lets you switch between them quickly. So as soon as you're done with the ediff session that screwed everything up you can simply hit C-left arrow and the previous setup is magically recovered.
 </p>
 <p>
 ediff is very nice, by the way. Make sure you take a look at it.
@@ -225,7 +229,7 @@ Nobody knows why it's called hippie-expand, by the way. It's written by a Swede,
 </pre>
 
 <p>
-This is the only non-standard package I'll install for now. Highlight-symbol-mode looks at the symbol at point, and highlights all other occurrences of it in the buffer. Extremely useful for quick visual feedback on where this variable was first declared, for example.
+This is the only non-standard package I'll install for now. Highlight-symbol-mode looks at the symbol at point, and highlights all other occurrences of it in the buffer. Extremely useful for quick visual feedback on where a variable was first declared, for example.
 </p>
 <p>
 To get this to work you first need download the elisp code from http://nschum.de/src/Emacs/highlight-symbol. Put it in a folder called ~/.emacs.d/site-lisp. The listed commands simply sets up this folder as a place where elisp libraries are available, and then loads it up. Setting "highlight-symbol-idle-delay" to 0.3 means that it'll wait 0.3 seconds before starting to do any highlighting.
@@ -238,12 +242,18 @@ Finally, and a bit annoying, is that this is just a minor mode so you can't turn
 <pre>
 (global-set-key "\C-c;" 'comment-or-uncomment-region)
 (global-set-key "\C-cc" 'compile)
+
+(add-hook 'python-mode-hook 'subword-mode)
+(add-hook 'c++-mode-hook 'subword-mode)
 </pre>
 <p>
 This first line here simply adds a keybinding that calls the comment-or-uncomment-region command when I press C-c ;. The command does exactly what you'd expect: if the current region is not a comment it is commented out, and vice versa. It uses the comment style defined by the major mode you're currently using, so it works for all programming languages.
 </p>
 <p>
 The second command is to bind C-cc to the compile command. This will let you specify a command to compile the current buffer, and sends the output to a special buffer called *compilation*, where you can step through error messages and so on.
+</p>
+<p>
+Finally I'm enabling subword-mode for a bunch of major modes. This changes the way Emacs treats words written in CamelCase. Without subword-mode hitting M-d when point is on, let's say, "AbstractFactoryImpl" will delete the whole thing. But with subword-mode enabled only the first camel-cased word is deleted -- and you're left with "FactoryImpl". This is very useful if you're working on code that is written in this style.
 </p>
 
 <h2>Text editing</h2>
@@ -267,9 +277,9 @@ Another thing worth knowing about is longlines-mode. I don't do anything special
 (global-set-key (kbd "<right>") nil)
 </pre>
 
-One thing that comes up a lot is Emacs' steep learning curve, and how you need to invest in getting comfortable with it. Here's a good way to get into that mindset: Turn off the arrow keys and force yourself to use C-f, C-b, C-n and C-p to navigate around the buffers instead. It took me a week or two to recover after I did this, but it seems like editing goes faster now since I don't leave home row that often anymore.
+One thing that comes up a lot is Emacs's steep learning curve, and how you need to invest in getting comfortable with it. Here's a good way to get into that mindset: Turn off the arrow keys and force yourself to use C-f, C-b, C-n and C-p to navigate around the buffers instead. It took me a week or two to recover after I did this, but it seems like editing goes faster now since I don't leave home row that often anymore.
 
-Arguably, this is a bit crazy, so you may not want to do this your first week with Emacs. Or try it right before a critical deadline. Another downside is that once you get used to these keybindings you will constantly have other programs open new windows and print dialog boxes when you try to navigate their text fields. But that's the life we chose.
+Arguably this is a bit extreme, so you may not want to do this your first week with Emacs. Or try it right before a critical deadline. Another downside is that once you get used to these keybindings you will constantly have other programs open new windows and print dialog boxes when you try to navigate their text fields. But that's the life we chose.
 
 <h2>Daemon / server mode</h2>
 
@@ -278,7 +288,9 @@ Arguably, this is a bit crazy, so you may not want to do this your first week wi
 </pre>
 
 <p>
-Down the line you'll actually end up loading so much elisp that starting up a new Emacs process will take a few seconds. That's a bit too much, and if you're like me you soon be thinking about picking some other editor just for all those fast one-off changes you need to make at the command line. No fear, server-mode to the rescue. This mode lets you keep one instance of Emacs running and have it act as a server, and whenever you need a new editor you start up lighter client versions that connect to the server to get their initial state. Startup is instant and you're able to share buffers between the server and clients.
+Down the line you'll actually end up loading so much elisp that starting up a new Emacs process will take a few seconds. That's a bit too much, and if you're like me you soon be thinking about picking some OTHER editor just for all those fast one-off changes you need to make at the command line. That's not good.
+</p>
+<p>No fear, server-mode to the rescue. This mode lets you keep one instance of Emacs running and have it act as a server, and whenever you need a new editor you start up lighter client versions that connect to the server to get their initial state. Startup is instant and you're able to share buffers between the server and clients.
 </p>
 <p>
 To take advantage of this, the trick is simply to call "(server-start)" from your main Emacs instance. Then run "emacsclient -c -nw" instead of "emacs" from the shell whenever you need a new editor (remember to change $EDITOR in your shell configuration).
